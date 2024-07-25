@@ -65,6 +65,7 @@ def handle_bye(message: Message):
     except Exception as e:
         print(f"Error handling 'Bye!': {e}")
 
+@bot.message_handler(func=lambda message: message.text in ["Add income", "Add costs", "View the report"])
 def button_parse(message: Message):
     try:
         if message.text == "Add income":
