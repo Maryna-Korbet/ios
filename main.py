@@ -50,13 +50,35 @@ def start(message: Message):
 @bot.message_handler(func=lambda message: message.text == "👋 Hi")
 def handle_hi(message: Message):
     try:
-        if str(message.chat.id) not in data.keys():
-            data[str(message.chat.id)] = []
+        user_id = str(message.chat.id)
+        if user_id not in data.keys():
+            data[user_id] = {
+                "transactions": [],
+                "initial_balance": None
+            }
             update_data()
-        sent_message = bot.send_message(message.chat.id, 'Choose menu:', reply_markup=menu_keyboard)
-        bot.register_next_step_handler(sent_message, button_parse)
+        if data[user_id]["initial_balance"] is None:
+            sent_message = bot.send_message(message.chat.id, 'Enter your initial balance: ')
+            bot.register_next_step_handler(sent_message, set_initial_balance)
+        else:
+            sent_message = bot.send_message(message.chat.id, 'Choose menu:', reply_markup=menu_keyboard)
+            bot.register_next_step_handler(sent_message, button_parse)
     except Exception as e:
         print(f"Error handling 'Hi': {e}")
+
+def set_initial_balance(message: Message):
+    try:
+        initial_balance = int(message.text)
+        user_id = str(message.chat.id)
+        data[user_id]["initial_balance"] = initial_balance
+        update_data()
+        bot.send_message(message.chat.id, 'Initial balance set!')
+        sent_message = bot.send_message(message.chat.id, 'Choose menu:', reply_markup=menu_keyboard)
+        bot.register_next_step_handler(sent_message, button_parse)
+    except ValueError:
+        bot.send_message(message.chat.id, 'Invalid input. Please enter a valid number for your initial balance.')
+        sent_message = bot.send_message(message.chat.id, 'Enter your initial balance: ')
+        bot.register_next_step_handler(sent_message, set_initial_balance)
 
 @bot.message_handler(func=lambda message: message.text == "Bye!")
 def handle_bye(message: Message):
@@ -75,18 +97,22 @@ def button_parse(message: Message):
             sent_message = bot.send_message(message.chat.id, 'Enter the cost amount and comment separated by a space: ')
             bot.register_next_step_handler(sent_message, handler_outcome)
         elif message.text == 'View the report':
+            user_id = str(message.chat.id)
+            initial_balance = data[user_id]["initial_balance"]
             full_count_income = 0
             full_count_outcome = 0
 
-            for operation in data[str(message.chat.id)]:
+            for operation in data[user_id]["transactions"]:
                 if operation['status'] == 'plus':
                     full_count_income += operation['count']
                 else:
                     full_count_outcome += operation['count']
 
-            message_text = f'The total amount of expenses: {full_count_outcome} $ \nThe total amount of income: {full_count_income} $\n\n'
+            current_balance = initial_balance + full_count_income - full_count_outcome
 
-            for operation in data[str(message.chat.id)]:
+            message_text = f'Total amount of expenses: {full_count_outcome} $ \nTotal amount of income: {full_count_income} $\nCurrent balance: {current_balance} $\n\n'
+
+            for operation in data[user_id]["transactions"]:
                 if operation['status'] == 'plus':
                     message_text += f"+ {operation['count']} | {operation['comment']}\n"
                 else:
@@ -108,7 +134,8 @@ def handler_income(message: Message):
             raise ValueError('Invalid input. Please enter the amount and comment separated by a space.')
         count = int(parts[0])
         comment = parts[1]
-        data[str(message.chat.id)].append({
+        user_id = str(message.chat.id)
+        data[user_id]["transactions"].append({
             'count': count,
             'comment': comment,
             'status': 'plus'
@@ -128,7 +155,8 @@ def handler_outcome(message: Message):
             raise ValueError('Invalid input. Please enter the amount and comment separated by a space.')
         count = int(parts[0])
         comment = parts[1]
-        data[str(message.chat.id)].append({
+        user_id = str(message.chat.id)
+        data[user_id]["transactions"].append({
             'count': count,
             'comment': comment,
             'status': 'minus'
