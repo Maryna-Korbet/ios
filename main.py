@@ -43,7 +43,7 @@ data = load_data()
 @bot.message_handler(commands=["start"])
 def start(message: Message):
     try:
-        bot.send_photo(message.chat.id, 'https://www.freepik.com/free-vector/cheerful-wallet-with-laptop-donation-cashback-budget_3734206.htm#fromView=search&page=1&position=33&uuid=03064bcd-0c50-4ff4-89e7-d15fcc27591b')
+        bot.send_photo(message.chat.id, 'https://www.flickr.com/photos/201197799@N08/53884823096/in/dateposted-public/')
         bot.send_message(message.chat.id, f"Hello, {message.from_user.username}", reply_markup=my_first_keyboard)
     except Exception as e:
         print(f"Error sending start message: {e}")
@@ -59,9 +59,11 @@ def handle_hi(message: Message):
             }
             update_data()
         if data[user_id]["initial_balance"] is None:
+            bot.send_photo(message.chat.id, 'https://www.flickr.com/photos/201197799@N08/53885295744/in/dateposted-public/')
             sent_message = bot.send_message(message.chat.id, 'Enter your initial balance: ')
             bot.register_next_step_handler(sent_message, set_initial_balance)
         else:
+            bot.send_photo(message.chat.id, 'https://www.flickr.com/photos/201197799@N08/53884155577/in/dateposted-public/')
             sent_message = bot.send_message(message.chat.id, 'Choose menu:', reply_markup=menu_keyboard)
             bot.register_next_step_handler(sent_message, button_parse)
     except Exception as e:
@@ -74,9 +76,11 @@ def set_initial_balance(message: Message):
         data[user_id]["initial_balance"] = initial_balance
         update_data()
         bot.send_message(message.chat.id, 'Initial balance set!')
+        bot.send_photo(message.chat.id, 'https://www.flickr.com/photos/201197799@N08/53884155577/in/dateposted-public/')
         sent_message = bot.send_message(message.chat.id, 'Choose menu:', reply_markup=menu_keyboard)
         bot.register_next_step_handler(sent_message, button_parse)
     except ValueError:
+        bot.send_photo(message.chat.id, 'https://www.flickr.com/photos/201197799@N08/53885036678/in/dateposted-public/')
         bot.send_message(message.chat.id, 'Invalid input. Please enter a valid number for your initial balance.')
         sent_message = bot.send_message(message.chat.id, 'Enter your initial balance: ')
         bot.register_next_step_handler(sent_message, set_initial_balance)
@@ -84,6 +88,7 @@ def set_initial_balance(message: Message):
 @bot.message_handler(func=lambda message: message.text == "Bye!")
 def handle_bye(message: Message):
     try:
+        bot.send_photo(message.chat.id, 'https://www.flickr.com/photos/201197799@N08/53885147249/in/dateposted-public/')
         bot.send_message(message.chat.id, 'See you next time!')
     except Exception as e:
         print(f"Error handling 'Bye!': {e}")
@@ -118,11 +123,15 @@ def button_parse(message: Message):
                     message_text += f"+ {operation['count']} | {operation['comment']}\n"
                 else:
                     message_text += f"- {operation['count']} | {operation['comment']}\n"
+            bot.send_photo(message.chat.id, 'https://www.flickr.com/photos/201197799@N08/53885295744/in/dateposted-public/')
             bot.send_message(message.chat.id, message_text)
+            bot.send_photo(message.chat.id, 'https://www.flickr.com/photos/201197799@N08/53884155577/in/dateposted-public/')
             sent_message = bot.send_message(message.chat.id, 'Choose menu:', reply_markup=menu_keyboard)
             bot.register_next_step_handler(sent_message, button_parse)
         else:
+            bot.send_photo(message.chat.id, 'https://www.flickr.com/photos/201197799@N08/53885036678/in/dateposted-public/')
             bot.send_message(message.chat.id, 'Unknown command')
+            bot.send_photo(message.chat.id, 'https://www.flickr.com/photos/201197799@N08/53884155577/in/dateposted-public/')
             sent_message = bot.send_message(message.chat.id, 'Choose menu:', reply_markup=menu_keyboard)
             bot.register_next_step_handler(sent_message, button_parse)
     except Exception as e:
@@ -142,10 +151,13 @@ def handler_income(message: Message):
             'status': 'plus'
         })
         update_data()
+        bot.send_photo(message.chat.id, 'https://www.flickr.com/photos/201197799@N08/53883934257/in/dateposted-public/')
         bot.send_message(message.chat.id, 'Income added!')
     except (IndexError, ValueError) as e:
+        bot.send_photo(message.chat.id, 'https://www.flickr.com/photos/201197799@N08/53885036678/in/dateposted-public/')
         bot.send_message(message.chat.id, str(e))
     finally:
+        bot.send_photo(message.chat.id, 'https://www.flickr.com/photos/201197799@N08/53884155577/in/dateposted-public/')
         sent_message = bot.send_message(message.chat.id, 'Choose menu:', reply_markup=menu_keyboard)
         bot.register_next_step_handler(sent_message, button_parse)
 
@@ -163,10 +175,13 @@ def handler_outcome(message: Message):
             'status': 'minus'
         })
         update_data()
+        bot.send_photo(message.chat.id, 'https://www.flickr.com/photos/201197799@N08/53885259200/in/dateposted-public/')
         bot.send_message(message.chat.id, 'Expense added!')
     except (IndexError, ValueError) as e:
+        bot.send_photo(message.chat.id, 'https://www.flickr.com/photos/201197799@N08/53885036678/in/dateposted-public/')
         bot.send_message(message.chat.id, str(e))
     finally:
+        bot.send_photo(message.chat.id, 'https://www.flickr.com/photos/201197799@N08/53884155577/in/dateposted-public/')
         sent_message = bot.send_message(message.chat.id, 'Choose menu:', reply_markup=menu_keyboard)
         bot.register_next_step_handler(sent_message, button_parse)
 
