@@ -43,6 +43,7 @@ data = load_data()
 @bot.message_handler(commands=["start"])
 def start(message: Message):
     try:
+        bot.send_photo(message.chat.id, 'https://www.freepik.com/free-vector/cheerful-wallet-with-laptop-donation-cashback-budget_3734206.htm#fromView=search&page=1&position=33&uuid=03064bcd-0c50-4ff4-89e7-d15fcc27591b')
         bot.send_message(message.chat.id, f"Hello, {message.from_user.username}", reply_markup=my_first_keyboard)
     except Exception as e:
         print(f"Error sending start message: {e}")
