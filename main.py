@@ -1,6 +1,8 @@
 import telebot
 import os
 import json
+import matplotlib.pyplot as plt
+import random
 
 from dotenv import load_dotenv
 from telebot.types import Message, ReplyKeyboardMarkup, KeyboardButton
@@ -39,6 +41,41 @@ def update_data():
         json.dump(data, file, indent=4, ensure_ascii=False)
 
 data = load_data()
+
+def create_bar_chart(transactions, filename):
+    incomes = [t for t in transactions if t["status"] == "plus"]
+    expenses = [t for t in transactions if t["status"] == "minus"]
+
+    income_counts = [t["count"] for t in incomes]
+    income_labels = [t["comment"] for t in incomes]
+    expense_counts = [t["count"] for t in expenses]
+    expense_labels = [t["comment"] for t in expenses]
+
+    fig, ax = plt.subplots()
+
+    def generate_colors(num_colors):
+        return ["#%06x" % random.randint(0, 0xFFFFFF) for _ in range(num_colors)]
+
+    income_colors = generate_colors(len(income_counts))
+    expense_colors = generate_colors(len(expense_counts))
+
+    ax.bar("Income", sum(income_counts), color=income_colors, edgecolor='black', hatch='/')
+    bottom = 0
+    for count, color in zip(income_counts, income_colors):
+        ax.bar("Income", count, bottom=bottom, color=color)
+        bottom += count
+
+    ax.bar("Expense", sum(expense_counts), color=expense_colors, edgecolor='black', hatch='/')
+    bottom = 0
+    for count, color in zip(expense_counts, expense_colors):
+        ax.bar("Expense", count, bottom=bottom, color=color)
+        bottom += count
+
+    ax.set_ylabel('Amount ($)')
+    ax.set_title('Income and Expenses')
+
+    plt.savefig(filename)
+    plt.close()
 
 @bot.message_handler(commands=["start"])
 def start(message: Message):
@@ -123,8 +160,14 @@ def button_parse(message: Message):
                     message_text += f"+ {operation['count']} | {operation['comment']}\n"
                 else:
                     message_text += f"- {operation['count']} | {operation['comment']}\n"
-            bot.send_photo(message.chat.id, 'https://www.flickr.com/photos/201197799@N08/53885295744/in/dateposted-public/')
+
             bot.send_message(message.chat.id, message_text)
+
+            # Create and send the bar chart
+            chart_filename = f'{user_id}_transactions_chart.png'
+            create_bar_chart(data[user_id]["transactions"], chart_filename)
+            bot.send_photo(message.chat.id, open(chart_filename, 'rb'))
+
             bot.send_photo(message.chat.id, 'https://www.flickr.com/photos/201197799@N08/53884155577/in/dateposted-public/')
             sent_message = bot.send_message(message.chat.id, 'Choose menu:', reply_markup=menu_keyboard)
             bot.register_next_step_handler(sent_message, button_parse)
